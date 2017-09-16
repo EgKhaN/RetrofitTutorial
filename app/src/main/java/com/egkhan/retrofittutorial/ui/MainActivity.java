@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.egkhan.retrofittutorial.BuildConfig;
 import com.egkhan.retrofittutorial.R;
 import com.egkhan.retrofittutorial.api.model.GitHubRepo;
 import com.egkhan.retrofittutorial.api.model.User;
@@ -17,6 +18,8 @@ import com.egkhan.retrofittutorial.ui.adapter.GitHubRepoAdapter;
 
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -96,8 +99,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Retrofit buildRetrofit(String baseUrl) {
+        //create OkHttp client
+        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+        //add logging interceptor to client
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);//body'de çok büyük şeyler gelebilir,log için kötü olabilir
+
+        if (BuildConfig.DEBUG) { //sadece debug modunda yapar
+            okHttpClientBuilder.addInterceptor(loggingInterceptor);
+        }
+
+
         Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3000/api").addConverterFactory(GsonConverterFactory.create());
+                .baseUrl("http://10.0.2.2:3000/api/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(okHttpClientBuilder.build());
 
         return builder.build();
     }
